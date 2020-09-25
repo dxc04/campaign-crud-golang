@@ -6,6 +6,7 @@ import (
     "net/http"
     "strconv"
 
+    "github.com/rs/cors"
     "github.com/gorilla/mux"
 )
 
@@ -21,6 +22,9 @@ var campaigns []Campaign
 
 func getCampaigns(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
+    if campaigns == nil {
+        campaigns = make([]Campaign, 0)
+    }
     json.NewEncoder(w).Encode(campaigns)
 }
 
@@ -76,17 +80,23 @@ func deleteCampaign(w http.ResponseWriter, r *http.Request) {
 func main() {
 
     // dummy data
-    campaigns = append(campaigns, 
+/*     campaigns = append(campaigns, 
         Campaign{ID: "1", Name: "VIP Campaign", Status: "Running", StartDate: "09/08/2020", Channel: "Email"},
-        Campaign{ID: "2", Name: "Wednesday Madness", Status: "Recurring", StartDate: "09/09/2020", Channel: "Social Media"})
+        Campaign{ID: "2", Name: "Wednesday Madness", Status: "Recurring", StartDate: "09/09/2020", Channel: "Social Media"}) */
 
     router := mux.NewRouter()
+    router.HandleFunc("/campaigns", getCampaigns).Methods("GET", "OPTIONS")
+    router.HandleFunc("/campaign", createCampaign).Methods("POST", "OPTIONS")
+    router.HandleFunc("/campaign/{id}", getCampaigns).Methods("GET", "OPTIONS")
+    router.HandleFunc("/campaign/{id}", updateCampaign).Methods("POST", "OPTIONS")
+    router.HandleFunc("/campaign/{id}", deleteCampaign).Methods("DELETE", "OPTIONS")
 
-    router.HandleFunc("/campaigns", getCampaigns).Methods(http.MethodGet)
-    router.HandleFunc("/campaign", createCampaign).Methods(http.MethodPost)
-    router.HandleFunc("/campaign/{id}", getCampaigns).Methods(http.MethodGet)
-    router.HandleFunc("/campaign/{id}", updateCampaign).Methods(http.MethodPut)
-    router.HandleFunc("/campaign/{id}", deleteCampaign).Methods(http.MethodDelete)
-
-    log.Fatal(http.ListenAndServe(":8081", router))
+    port := ":4000"
+    handler := cors.New(cors.Options{
+        AllowedOrigins: []string{"http://localhost:8080"},
+        AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        Debug: true,
+    }).Handler(router)
+    print("Listening And Serving on " + port)
+    log.Fatal(http.ListenAndServe(port, handler))
 }
