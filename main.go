@@ -88,7 +88,7 @@ func main() {
     router.HandleFunc("/campaigns", getCampaigns).Methods("GET", "OPTIONS")
     router.HandleFunc("/campaign", createCampaign).Methods("POST", "OPTIONS")
     router.HandleFunc("/campaign/{id}", getCampaigns).Methods("GET", "OPTIONS")
-    router.HandleFunc("/campaign/{id}", updateCampaign).Methods("POST", "OPTIONS")
+    router.HandleFunc("/campaign/{id}", updateCampaign).Methods("PUT", "OPTIONS")
     router.HandleFunc("/campaign/{id}", deleteCampaign).Methods("DELETE", "OPTIONS")
 
     port := ":4000"
